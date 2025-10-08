@@ -1,5 +1,5 @@
-node_modules
-.next
-lib/generated
-dist
-build
+# .eslintignore
+node_modules/
+.next/
+dist/
+lib/generated/

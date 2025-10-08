@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,7 +15,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { resetPassword } from "@/lib/auth-client";
 import { Spinner } from "@/components/ui/spinner";
 
-export default function ResetPasswordPage() {
+// ✅ Pisahkan logika ke komponen ini
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -27,7 +28,6 @@ export default function ResetPasswordPage() {
   const [token, setToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // Ambil token dari URL (misal: ?token=xxxxx)
     const tokenParam = searchParams.get("token");
     if (!tokenParam) {
       setError("Invalid or missing token");
@@ -40,9 +40,8 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError("");
 
-    // Validasi input
     if (password !== confirmPassword) {
-      setError("Password do not match");
+      setError("Passwords do not match");
       return;
     }
     if (password.length < 8) {
@@ -78,7 +77,6 @@ export default function ResetPasswordPage() {
     }
   };
 
-  // Tampilkan loading screen saat token belum di-load
   if (!token && !error) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -155,5 +153,14 @@ export default function ResetPasswordPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// ✅ Komponen utama dibungkus Suspense
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
