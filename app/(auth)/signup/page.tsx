@@ -3,10 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
-import { router } from "better-auth/api";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -23,29 +21,35 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
     if (password !== confirmPassword) {
-      setError("Password do not match");
+      setError("Passwords do not match");
+      setLoading(false);
       return;
     }
+
     if (password.length < 8) {
-      setError("Password must be at least 8 character");
+      setError("Password must be at least 8 characters");
+      setLoading(false);
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address");
+      setLoading(false);
       return;
     }
 
     try {
-      const result = await signUp.email({
-        name,
-        email,
-        password,
-      });
+      const result = await signUp.email({ name, email, password });
       if (result.error) {
         setError(result.error.message ?? "Unknown error");
       } else {
         router.push("/dashboard");
       }
-    } catch (error) {
-      setError("An error occuring during signup");
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred during signup");
     } finally {
       setLoading(false);
     }
@@ -66,12 +70,14 @@ export default function SignupPage() {
                   <FieldLabel htmlFor="name">Full Name</FieldLabel>
                   <Input id="name" type="text" placeholder="John Doe" required value={name} onChange={(e) => setName(e.target.value)} />
                 </Field>
+
                 <Field>
                   <FieldLabel htmlFor="email">Email</FieldLabel>
                   <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
                 </Field>
+
                 <Field>
-                  <Field className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel htmlFor="password">Password</FieldLabel>
                       <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -80,23 +86,23 @@ export default function SignupPage() {
                       <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
                       <Input id="confirm-password" type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                     </Field>
-                  </Field>
+                  </div>
                   <FieldDescription>Must be at least 8 characters long.</FieldDescription>
                 </Field>
+
                 <Field>
-                  <Button type="submit" disabled={loading}>
-                    {" "}
+                  <Button type="submit" disabled={loading} className="w-full">
                     {loading ? (
                       <>
-                        <Spinner />
-                        Creating...
+                        <Spinner /> Creating...
                       </>
                     ) : (
                       "Create Account"
                     )}
                   </Button>
+                  {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
                   <FieldDescription className="text-center">
-                    Already have an account? <a href="/login">Sign in</a>
+                    Already have an account? <a href="/login" className="text-blue-600 hover:underline">Sign in</a>
                   </FieldDescription>
                 </Field>
               </FieldGroup>
