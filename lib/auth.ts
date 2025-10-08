@@ -12,6 +12,13 @@ export const auth = betterAuth({
     provider: "postgresql", // bisa juga mysql dll
   }),
 
+    // ✅ tambahkan baseURL dan allowed origins
+  baseURL: process.env.BETTER_AUTH_URL, // gunakan dari .env / Vercel env
+  origin: [
+    process.env.NEXT_PUBLIC_APP_URL!,
+    "http://localhost:3000", // untuk dev
+  ],
+
   emailAndPassword: {
     enabled: true,
 
