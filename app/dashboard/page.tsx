@@ -1,63 +1,69 @@
 "use client"
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { signOut, useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { AppSidebar } from "@/components/app-sidebar"
+import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { DataTable } from "@/components/data-table"
+import { SectionCards } from "@/components/section-cards"
+import { SiteHeader } from "@/components/site-header"
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar"
 
-export default function DashboardPage() {
+import data from "./data.json"
+import { useRouter } from "next/navigation"
+import { useSession } from "@/lib/auth-client"
+import { useEffect } from "react"
 
-    const router = useRouter()
-    const {data: session, isPending} = useSession()
-    
-    useEffect(() => {
-        if (!isPending && !session) {
-            router.push("/login")
-        }
-    }, [session, isPending, router])
+export default function Page() {
 
-    if (isPending) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p>
-                    Loading...
-                </p>
-            </div>
-        )
-    }
-
-    if (!session) {
-        return null
-    }
-
-    const handleSignOut = async () => {
-        await signOut()
-        router.push("/")
-    }
+  const router = useRouter()
+      const {data: session, isPending} = useSession()
+      
+      useEffect(() => {
+          if (!isPending && !session) {
+              router.push("/login")
+          }
+      }, [session, isPending, router])
+  
+      if (isPending) {
+          return (
+              <div className="flex min-h-screen items-center justify-center">
+                  <p>
+                      Loading...
+                  </p>
+              </div>
+          )
+      }
+  
+      if (!session) {
+          return null
+      }
+  
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Dashboard</CardTitle>
-          <CardDescription> Welcome back!</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Name</p>
-            {<span>{session?.user?.name}</span>}
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <SectionCards />
+              <div className="px-4 lg:px-6">
+                <ChartAreaInteractive />
+              </div>
+              <DataTable data={data} />
+            </div>
           </div>
-          <div className=" space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Email
-              {<span>{session?.user?.email}</span>}
-            </p>
-          </div>
-          <Button onClick={handleSignOut} variant={"outline"} className="w-full bg-transparent">
-            Sign Out
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
 }
